@@ -1,0 +1,16 @@
+{
+    "name": "sajeed/php-crud-with-opps-concept",
+    "autoload": {
+        "psr-4": {
+            "Classes\\": "Classes/",
+            "Connection\\": "Connection/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Sajeed Kannoje",
+            "email": "94436046+sajeedNetz@users.noreply.github.com"
+        }
+    ],
+    "require": {}
+}
