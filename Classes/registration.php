@@ -7,6 +7,7 @@ include_once(__DIR__ . '/../vendor/autoload.php');
 use Classes\Interfaces\RegistrationInterface;
 use Connection\Connection;
 use Classes\Filter;
+use Classes\User;
 
 class Registration extends Connection  implements RegistrationInterface
 {
@@ -20,28 +21,28 @@ class Registration extends Connection  implements RegistrationInterface
             return [
                 'status' => 'false',
                 'field' => 'email',
-                'error' => 'not a valid email!'
+                'message' => 'not a valid email!'
             ];
         }
         if (!Filter::intValidate($data['phone'])) {
             return [
                 'status' => 'false',
                 'field' => 'phone',
-                'error' => 'not a valid phone!'
+                'message' => 'not a valid phone!'
             ];
         }
         if (!Filter::stringValidate($data['first_name'])) {
             return [
                 'status' => 'false',
-                'field' => 'first name',
-                'error' => 'not a valid name!'
+                'field' => 'first_name',
+                'message' => 'not a valid name!'
             ];
         }
         if (!Filter::stringValidate($data['last_name'])) {
             return [
                 'status' => 'false',
-                'field' => 'last name',
-                'error' => 'not a valid name!'
+                'field' => 'last_name',
+                'message' => 'not a valid name!'
             ];
         }
         $passwordValidate =  Filter::passwordValidate($data['password'], 'password');
@@ -56,7 +57,7 @@ class Registration extends Connection  implements RegistrationInterface
             return [
                 'status' => 'false',
                 'field' => 'password',
-                'error' => 'password and confirm password not matched!'
+                'message' => 'password and confirm password not matched!'
             ];
         }
         $email = Filter::emailSanitize($data['email']);
@@ -66,8 +67,10 @@ class Registration extends Connection  implements RegistrationInterface
         $password  = password_hash($data['password'], PASSWORD_DEFAULT);
         $role_id = 2; // 2 is for normal user
         $response =  self::store(compact('email', 'first_name', 'last_name', 'phone', 'password', 'role_id'));
-        if ($response['status'] === true) {
-            session_start();
+        if (isset($response['status']) &&  $response['status'] === true) {
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
             $_SESSION['login'] = true;
             $_SESSION['user_id'] = $response['user_id'];
             return [
@@ -77,9 +80,46 @@ class Registration extends Connection  implements RegistrationInterface
             return  $response;
         }
     }
-    public  function login()
+    public  function login($data)
     {
-        echo "hello";
+        if (!Filter::emailSanitize($data['email'])) {
+            return [
+                'status' => 'false',
+                'field' => 'email',
+                'message' => 'not a valid email!'
+            ];
+        }
+        $passwordValidate = Filter::passwordValidate($data['password'], 'password');
+        if (isset($passwordValidate['status']) && $passwordValidate['status'] == 'false') {
+            return $passwordValidate;
+        }
+        $email = Filter::emailSanitize($data['email']);
+        $user = new User();
+        $user = $user->getByEmail($email);
+        if (!empty($user)) {
+            if (password_verify($data['password'], $user['password'])) {
+                if (session_status() === PHP_SESSION_NONE) {
+                    session_start();
+                }
+                $_SESSION['login'] = true;
+                $_SESSION['user_id'] = $user['id'];
+                return [
+                    'status' => 'true'
+                ];
+            } else {
+                return [
+                    'status' => 'false',
+                    'field' => 'password',
+                    'message' => 'incorrect password!'
+                ];
+            }
+        } else {
+            return [
+                'status' => 'false',
+                'field' => 'email',
+                'message' => 'user not found!'
+            ];
+        }
     }
     public  function store($data)
     {
@@ -87,11 +127,12 @@ class Registration extends Connection  implements RegistrationInterface
             $stmt = $this->connection->prepare('SELECT COUNT(email) AS EmailCount FROM users WHERE email =? ');
             $stmt->bind_param('s', $data['email']);
             $stmt->execute();
-            $result = $stmt->get_result();
-            if ($result->num_rows >= 1) {
+            $result = $stmt->get_result()->fetch_assoc();
+            if (isset($result['EmailCount']) &&  $result['EmailCount'] != 0) {
                 return [
-                    'status' => false,
-                    'message' => "email already exist"
+                    'status' => 'false',
+                    'field' => 'email',
+                    'message' => 'email already exist!'
                 ];
             } else {
                 $stmt = $this->connection->prepare("INSERT INTO users (first_name,last_name,email,phone,password,role_id) VALUE (?,?,?,?,?,? ) ");
@@ -108,7 +149,9 @@ class Registration extends Connection  implements RegistrationInterface
                     ];
                 }
             }
+            $stmt->close();
         } catch (\Throwable $th) {
+            //throw $th;
         }
     }
 }

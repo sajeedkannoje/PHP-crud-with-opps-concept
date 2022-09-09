@@ -3,7 +3,8 @@
     "autoload": {
         "psr-4": {
             "Classes\\": "Classes/",
-            "Connection\\": "Connection/"
+            "Connection\\": "Connection/",
+            "Traits\\": "Traits/"
         }
     },
     "authors": [

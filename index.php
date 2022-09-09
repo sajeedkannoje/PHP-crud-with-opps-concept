@@ -1,6 +1,5 @@
 <?php
     $pageName= "Home | Welcome to my website.";
-    require './connection/connections.php';
     require './elements/header.php';
 ?>
 <main>

@@ -1,9 +1,10 @@
 <?php
-    $pageName= "Home | Welcome to my website.";
+    $pageName= "Registration | Please sign-in here";
     require './elements/header.php';
+    require './Connection/auth.php';
 ?>
 <main class="form-signin w-50 m-auto">
-  <form id="signup-form" method="post" action="ajax/registration_submit.php">
+  <form id="signup-form" method="post">
     <!-- <img class="mb-4" src="/docs/5.2/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57"> -->
     <h1 class="h3 mb-3 fw-normal">Please sign up</h1>
 
@@ -20,7 +21,7 @@
       <label for="floatingInput">Email address</label>
     </div>
     <div class="form-floating mb-3">
-      <input type="number" class="form-control" name="phone" id="phone"  placeholder="+ 1xxxxxxxx">
+      <input type="phone" class="form-control" name="phone" id="phone"  placeholder="+ 1xxxxxxxx">
       <label for="floatingInput">phone</label>
     </div>
     <div class="form-floating mb-3">
@@ -37,7 +38,9 @@
         <input type="checkbox" value="remember-me"> Remember me
       </label>
     </div>
-    <button class="w-100 btn btn-lg btn-primary" type="submit">Sign Up</button>
+    <button class="w-100 btn btn-lg btn-primary" type="submit" id="submit-sign-in">Sign Up 
+    <div class="spinner-border text-primary" style="display: none;"  id="loader" role="status"></div>
+    </button>
     <p class="mt-5 mb-3 text-muted">© 2017–2022</p>
   </form>
 </main>

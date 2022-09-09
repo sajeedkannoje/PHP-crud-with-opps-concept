@@ -38,14 +38,14 @@ class Filter implements FilterInterface
                      return [
                             'status' => 'false',
                             'field' => $filedName,
-                            'error' => 'please enter password!'
+                            'message' => 'please enter password!'
                      ];
               }
               if (strlen($password) < 6) {
                      return [
                             'status' => 'false',
                             'field' => $filedName,
-                            'error' => $filedName. ' must be greater then 6 character'
+                            'message' => $filedName. ' must be greater then 6 character'
                      ];
               }
               return 1;
